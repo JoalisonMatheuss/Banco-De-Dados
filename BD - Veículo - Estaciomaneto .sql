@@ -1,122 +1,126 @@
 create table Cliente(
-
     cpf integer PRIMARY KEY,
-
     nome varchar(60),
-
     dtNas date
 
 );
 
 create table Modelo(
-
     codMod integer PRIMARY KEY,
-
     Desc_2 varchar(40)
 
 );
 
 create table Veiculo(
-
     placa varchar(9) PRIMARY KEY,
-
     modelo_codMod integer REFERENCES Modelo,
-
     Cliente_cpf integer REFERENCES Cliente,
-    
     cor varchar(20),
-    
     ano integer 
 
 );
 
 create table Patio(
-
     num integer PRIMARY KEY,
-
     ender varchar(40),
-
     capacidade integer
 
 );
 
 create table Estaciona(
-
     cod_Estaciona integer PRIMARY KEY,
-
     patio_num integer REFERENCES Patio,
-
     veiculo_placa varchar(8) REFERENCES Veiculo,
-
     dtEntrada date,
-
     dtSaida date,
-
     hsEntrada varchar(10),
-
     hsSaida varchar(10)
 
 );
 
 insert into Cliente
-
 Values (10187300445,'Jooj','10-03-2002'),
 (10187300145,'Malaquias','10-03-2005');
 
 insert into Modelo
-
-values(023, 'Up');
+values(1, 'Up'),
+(022, 'Gol');
 
 insert into Veiculo
-
-values('QJH-1230',023,10187300445,'Vermelho',2000),
-('QJH-1236',023,10187300145,'Vermelho',2001);
+values('QJH-1230',1,10187300445,'Vermelho',2000),
+('QJH-1236',022,10187300145,'Vermelho',2001);
 
 insert into Patio
-
-values(1,'Terrio',5);
+values(1,'Terrio',5),
+(2, 'Terrio', 6);
 
 insert into Estaciona
-
 values (0, 1, 'QJH-1230', '25-04-2019', '25-04-2019', '12:00','00:00'),
 (1, 2, 'QJH-1236', '25-04-2018', '25-04-2018', '12:00','00:00');
 
---Questão 1)
+-- QUESTÃO 1)
 
-select placa, nome from Veiculo, Cliente;
+select v.placa, c.nome 
+from  Cliente c
+inner join Veiculo v
+on (c.cpf = v.Cliente_cpf);
 
---Questão 2)
+-- QUESTÃO 2)
 
-select cpf, nome from Cliente, Veiculo where placa LIKE '%0';
+select c.cpf, c.nome
+from Cliente c
+inner join Veiculo v
+on ( v.placa LIKE '%0') where c.cpf = v.Cliente_cpf;
 
--- Questão 3)
+-- QUESTÃO 3)
 
-select placa, cor from Veiculo, Estaciona where cod_Estaciona = 1;
+select v.placa, v.cor
+from Veiculo v
+inner join Estaciona e
+on(v.placa = e.Veiculo_placa) where e.cod_Estaciona = 1;
 
---Questão 4)
+-- QUESTÃO 4)
 
-select placa, ano from Veiculo where ano >= 2000;
+select v.placa, v.ano, m.Desc_2
+from Veiculo v
+inner join Modelo m 
+on (m.codMod = v.modelo_codMod) where v.ano >= 2000;
 
---Questão 5)
+-- QUESTÃO 5)
 
-select ender, dtEntrada, dtSaida from Patio, Estaciona, Veiculo where veiculo_placa LIKE  '%6'; 
+select p.ender, e.dtEntrada, e.dtSaida
+from Patio p
+inner join Estaciona e
+on (p.num = e.patio_num)
+inner join Veiculo v
+on (v.placa = e.veiculo_placa) where v.placa LIKE '%6';
 
---Questão 6)
+-- QUESTÃO 6)
 
-select count(cor) AS 'Qtd de Veiculos de cor verde' from veiculo, Estaciona
 
---Questão 7)
+-- QUESTÃO 7)
 
-select *from Veiculo, Modelo where codMod = 1;
+select c.nome, v.placa
+from Cliente c
+inner join Veiculo v 
+on ( c.cpf = v.Cliente_cpf)
+inner join Modelo m
+on (m.codMod = v.modelo_codMod) where m.codMod = 1;
 
---Quesstão 8)
+-- QUESTÃO 8)
 
-select placa, hsEntrada, hsSaida from Veiculo, Estaciona where cor = 'Vermelho';
+select v.placa, e.hsEntrada, e.hsSaida
+from Veiculo v
+inner join Estaciona e
+on(v.placa = e.Veiculo_placa) where v.cor = 'Vermelho';
 
---Questão 9)
+-- QUESTÃO 9)
 
-select count() from 
+-- QUESTÃO 10)
+select v.placa, c.nome, m.Desc_2
+from Cliente c
+inner join Veiculo v
+on(c.cpf = v.Cliente_cpf)
+inner join Modelo m
+on(m.codMod = v.modelo_codMod);
 
---Questão 10)
-
-select placa, nome, Desc_2 from Cliente, Veiculo, Modelo;
