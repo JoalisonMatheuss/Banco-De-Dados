@@ -150,27 +150,38 @@ ADD CONSTRAINT fk_trab_func FOREIGN KEY (ID_Func) REFERENCES Funcionario (ID_Fun
 
 ALTER TABLE Trabalha
 ADD CONSTRAINT fk_trab_proj FOREIGN KEY (ID_Proj) REFERENCES Projeto (ID_Proj) ON DELETE CASCADE;
-
-
-
-
-
-
-
-
---1º
-
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --a)
-create view Funcionario
-select f.NomeFunc, f.Endereco from Funcionario f;
-
---b)
-select f.NomeFunc, f.ID_Superv from Funcionario f;
+CREATE VIEW func_dept as
+SELECT F.NomeFunc as "Nome Func",F.Endereco as "Endereço" FROM Funcionario F
+INNER JOIN Departamento D
+on(D.ID_Depto = F.ID_Depto)
+where (NomeDepto = 'Pesquisa');
 
 --c)
-select f.Salario from Funcionario f
-where Endereco like '%Irai%';
+CREATE VIEW func_salario as
+SELECT DISTINCT f.NomeFunc as "Nome Func",f.Salario as "Salario" FROM Funcionario f
+where(F.Endereco like'%Irai%');
 
 --d)
+CREATE VIEW func_proj as
+SELECT F.ID_Depto"ID Departamento", F.NomeFunc as "Nome do func", (F.Salario*0.10 + F.Salario) as "Salario com aumento" FROM Funcionario F
+INNER JOIN Projeto P
+ON(F.ID_Depto = P.ID_Depto)
+WHERE(P.NomeProj = 'ProdX');
 
+--e)
+CREATE VIEW Func_Dep_Proj as
+SELECT F.NomeFunc as "Nome do Func" , D.NomeDepto "Nome do Departamento" , P.NomeProj as "Nome do Projeto" FROM Funcionario F
+INNER JOIN Departamento D ON (F.ID_Depto = D.ID_Depto)
+INNER JOIN Projeto P ON (P.ID_Depto = D.ID_Depto)
+ORDER BY NomeDepto, NomeProj;
+
+--f)
+CREATE VIEW Func_Proj_Trabalha
+SELECT F.NomeFunc FROM Funcionario F
+INNER JOIN Trabalha T 
+ON(F.ID_Func = T.ID_Func)
+INNER JOIN Projeto P 
+ON(T.ID_Proj = P.ID_Proj)
 
