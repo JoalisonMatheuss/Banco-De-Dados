@@ -1,5 +1,4 @@
-
-CREATE TABLE Departamento (
+﻿CREATE TABLE Departamento (
     ID_Depto    NUMERIC(2)      NOT NULL,
     NomeDepto   VARCHAR(30)   NOT NULL,
     ID_Gerente  NUMERIC(4)      NOT NULL,
@@ -158,6 +157,11 @@ INNER JOIN Departamento D
 on(D.ID_Depto = F.ID_Depto)
 where (NomeDepto = 'Pesquisa');
 
+--b)
+SELECT F.NomeFunc as "Nome FUnc", S.NomeFunc as "Nome Supervisor"  FROM Funcionario F
+INNER JOIN Funcionario S
+ON(S.ID_Superv = F.ID_Func); 
+
 --c)
 CREATE VIEW func_salario as
 SELECT DISTINCT f.NomeFunc as "Nome Func",f.Salario as "Salario" FROM Funcionario f
@@ -184,4 +188,12 @@ INNER JOIN Trabalha T
 ON(F.ID_Func = T.ID_Func)
 INNER JOIN Projeto P 
 ON(T.ID_Proj = P.ID_Proj)
+WHERE ID_Proj != (SELECT p.ID_Proj from Projeto p)
 
+
+Select p.ID_Proj from Projeto p
+inner join Funcionario f
+on(f.ID_Depto = p.ID_Depto)
+where (NomeFunc = 'Joao Silva');
+
+--g)
