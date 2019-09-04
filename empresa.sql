@@ -1,4 +1,4 @@
-﻿CREATE TABLE Departamento (
+CREATE TABLE Departamento (
     ID_Depto    NUMERIC(2)      NOT NULL,
     NomeDepto   VARCHAR(30)   NOT NULL,
     ID_Gerente  NUMERIC(4)      NOT NULL,
@@ -156,16 +156,20 @@ SELECT F.NomeFunc as "Nome Func",F.Endereco as "Endereço" FROM Funcionario F
 INNER JOIN Departamento D
 on(D.ID_Depto = F.ID_Depto)
 where (NomeDepto = 'Pesquisa');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --b)
-SELECT F.NomeFunc as "Nome FUnc", S.NomeFunc as "Nome Supervisor"  FROM Funcionario F
+CREATE VIEW Func_Supervisor as
+SELECT F.NomeFunc as "Nome Func", S.NomeFunc as "Nome Supervisor"  FROM Funcionario F
 INNER JOIN Funcionario S
-ON(S.ID_Superv = F.ID_Func); 
+ON(S.ID_Superv = F.ID_Func);
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --c)
 CREATE VIEW func_salario as
 SELECT DISTINCT f.NomeFunc as "Nome Func",f.Salario as "Salario" FROM Funcionario f
 where(F.Endereco like'%Irai%');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --d)
 CREATE VIEW func_proj as
@@ -173,6 +177,7 @@ SELECT F.ID_Depto"ID Departamento", F.NomeFunc as "Nome do func", (F.Salario*0.1
 INNER JOIN Projeto P
 ON(F.ID_Depto = P.ID_Depto)
 WHERE(P.NomeProj = 'ProdX');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --e)
 CREATE VIEW Func_Dep_Proj as
@@ -180,20 +185,54 @@ SELECT F.NomeFunc as "Nome do Func" , D.NomeDepto "Nome do Departamento" , P.Nom
 INNER JOIN Departamento D ON (F.ID_Depto = D.ID_Depto)
 INNER JOIN Projeto P ON (P.ID_Depto = D.ID_Depto)
 ORDER BY NomeDepto, NomeProj;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --f)
-CREATE VIEW Func_Proj_Trabalha
-SELECT F.NomeFunc FROM Funcionario F
-INNER JOIN Trabalha T 
-ON(F.ID_Func = T.ID_Func)
-INNER JOIN Projeto P 
-ON(T.ID_Proj = P.ID_Proj)
-WHERE ID_Proj != (SELECT p.ID_Proj from Projeto p)
-
-
-Select p.ID_Proj from Projeto p
-inner join Funcionario f
-on(f.ID_Depto = p.ID_Depto)
-where (NomeFunc = 'Joao Silva');
+CREATE VIEW Func_Trabalha as
+Select distinct F.NomeFunc as "Nome do Povo que trabalha com Joao", T.ID_Proj From Funcionario F
+inner join Trabalha T
+on(F.ID_Func = T.ID_Func)
+where T.ID_Proj
+in (Select P.ID_Proj as "ID Projeto" from Projeto P
+inner join Funcionario F
+on(F.ID_Depto = P.ID_Depto)
+where (F.NomeFunc = 'Joao Silva'));
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --g)
+CREATE VIEW Func_Dependentee as
+select F.ID_Func as "ID Funcionario", F.NomeFunc as "Nome Funcionario", D.NomeDep as "Nome Depedente" from Funcionario F
+inner join Dependente D
+on(F.ID_Func = D.ID_Func)
+where F.ID_Func
+in (Select F.ID_Func From Funcionario F
+Inner Join Dependente D
+on(F.ID_Func = D.ID_Func)
+Group by F.ID_Func, F.NomeFunc
+Having COUNT(D.ID_Func) > 2
+ORDER BY COUNT(D.ID_Func) DESC);
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--h)
+CREATE VIEW Soma_Media_Maximo_Minimo as
+Select SUM(Salario) as "Soma", AVG(Salario) as "Media", Max(Salario) as "Maximo", Min(Salario) as "Minimo" from Funcionario F
+inner join Departamento D
+on(D.ID_Depto = F.ID_Depto)
+where (NomeDepto = 'Pesquisa');
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--i)
+CREATE VIEW Supervisor as
+select S.NomeFunc as "Nome de Supervisores", COUNT(S.NomeFunc) as "Quantidade de Supervisionados" from Funcionario S
+inner join Funcionario F
+on(F.ID_Func = S.ID_Superv)
+Group By S.NomeFunc;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--j)
+CREATE VIEW Projeto_Trabalha as
+select P.NomeProj as "Nome do Projeto", COUNT(T.ID_Func) as "Quantidade de Funcionarios" From Projeto P
+inner join Trabalha T
+on(P.ID_Proj = T.ID_Proj)
+Group By P.NomeProj;
