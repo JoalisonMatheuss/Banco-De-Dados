@@ -1,0 +1,34 @@
+/*
+1)	Transações são conjuntos de instruções enviadas ao banco de 
+	dados que devem ser tratadas com uma única operação. 
+	Ou o servidor realiza tudo ou não realiza nada.
+
+
+2)	A - Atomicidade
+	C - Consistência
+	I - Isolamento
+	D - Durabilidade
+
+
+3)	BEGIN - Indica o inico da transação
+	SAVEPOINT - Estabelece um novo ponto de salvamento na transação corrente.
+	COMMIT - Indica o fim normal da transação
+	ROLLBACK - Também indica o fim da transação, mas tudo que tentou ser feito deve ser descartado
+
+
+4) 	Dirty read - Leitura Suja
+	Unrepeatable Reads - Leitura não Repetida
+	Phantom Read - Leitura Fanstama
+
+
+5)	READ UNCOMMITED - Especifica que as instruções podem ler linhas que foram modificadas por outras transações. 
+	READ COMMITED   - Especifica que as instruções não podem ler dados que foram modificados.  Aqui dirty reads estão barradas
+	REPEATABLE READ - Apenas as phantom reads podem ocorrer
+	SERIALIZABLE    - Esse é o nível que leva o isolamento ao máximo. Aqui, nenhum desses problemas podem ocorrer.
+
+
+6)	Para modificar o nível de isolamento da transação corrente, 
+	existe o comando SET TRANSACTION que deve ser executado 
+	logo após o BEGIN e antes de qualquer consulta SELECT, INSERT, DELETE, UPDATE, FETCH ou COPY.
+
+*/
