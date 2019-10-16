@@ -1,82 +1,75 @@
-﻿-- 7)
-
+/*Questão 7*/
+--a)
 
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
-UPDATE Jogador SET IdEquipe = 2 where RG = 111111111;
-
---o que aconteceu e por quê?  ==> A Sessão dois atualizou os dados da primeira
-
+UPDATE Jogador SET IdEquipe = 6 WHERE RG = '111111111';
+-- vi - O que aconteceu? A transação 2 foi atualizada, nada foi percebido pela outra transação.
 COMMIT;
-
---o que aconteceu e por quê?  ==> A Sessão dois atualizou os dados da primeira e foi confirmada na transação.
-
+--viii - o que aconteceu e por quê? A seção dois foi atualizada, ocorrendo uma leitura não repetivel
 
 
--- Leitura Fanstama.
+-- b)
 BEGIN;
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
-SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; 
-
-UPDATE Jogador SET IdEquipe = 3 where RG = 111111111;
-
+UPDATE Jogador SET IdEquipe = 5 WHERE RG = '111111111';
+-- Nao foi atualizado na transição 1, transaçao 2 não encerrada
 COMMIT;
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Não foi atualizado na sessão 1, mesmo depois de encerrada, não ocorre Phantom read
 
 
--- 8)
 
+/*Questão 8*/
 -- a)
-
--- Aqui vai ocorrer uma leitura fantasma na outra sessao, onde ela irá inserir novos elementos
 BEGIN;
-
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
-insert into Equipe values (12,'Fluminense',      'RJ', 'Profissional', -8);
-rollback
+INSERT INTO Equipe VALUES (10,'Flamengo',        'RJ', 'Profissional',       40);
 COMMIT;
 
+
+-- b)
+BEGIN;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+INSERT INTO Equipe VALUES (11,'Vasco',        'RJ', 'Profissional',       -10);
+
+COMMIT;
+
+
+
+/*Questão 9*/
+--a)
+BEGIN;
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+UPDATE Jogador SET IdEquipe = 11 WHERE RG = '111111114'
+-- iii. O que acontece na transação 2? Porquê?
+	-- A transação dois 'BUGOU', ficou impossibilitada de executar novos comandos, ficou em execução até ser executado o COMMIT na transação 1
+COMMIT;
 
 
 
 -- b)
-
--- Aqeui não vai acontecer a leitura fantasma, po SERIALIZABLE leva o isolamento ao maximo.
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-insert into Equipe values (12,'Fluminense',      'RJ', 'Profissional', -8);
-
+UPDATE Jogador SET IdEquipe = 9 WHERE RG = '111111115';
+--iii. O que acontece na transação 2?
+	--a sessao 2 ficou impossibilitada de executar novos comandos, em outras palavras a sessao 2 ficou em execucao ate que fosse executado um commit na sessao 1.
 COMMIT;
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
--- 9)
---a)
-
-BEGIN;
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED; 
-
-UPDATE Jogador SET IdEquipe = 11 where RG = 111111112;
--- Deu erro na transação 2, buga o Servidor
-
--- Volta ao normal depois da transacção 1 ser confirmada
-
-
-
---b)
+-- c)
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-UPDATE Jogador SET IdEquipe = 11 where RG = 111111112;
+
+UPDATE Jogador SET IdEquipe = 5 WHERE RG = '111111113';
+--iii. O que acontece na transação 2?
+	--a sessao 2 ficou impossibilitada de executar novos comandos, em outras palavras a sessao 2 ficou em execucao ate que fosse executado um commit na sessao 1.
 
 
 
---c)
-BEGIN;
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-UPDATE Jogador SET IdEquipe = 6 where RG = 111111113;
-rollback
--- Bugou a transação dois
