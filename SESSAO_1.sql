@@ -1,4 +1,3 @@
-﻿
 CREATE TABLE Equipe(
   IdEquipe INTEGER NOT NULL,
   Nome VARCHAR(60) NOT NULL,
@@ -180,92 +179,89 @@ insert into cores_uniforme values(7,7);
 insert into cores_uniforme values(7,2);
 insert into cores_uniforme values(8,7);
 
-
--- 7)
-
+/* Questão 8*/
+-- a)
 BEGIN;
-
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED; 
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED; -- Nao permite leitura suja
 
 SELECT * FROM Jogador j
-inner join Equipe e
-on (j.IdEquipe = e.IdEquipe) where (RG = 111111111);
+INNER JOIN Equipe e
+on(j.IdEquipe = e.IdEquipe)
+where (RG = '111111111');
+
+-- nada foi percebido pela outra transação., sem o COMMIT na transaço 2
 
 COMMIT;
 
--- o que aconteceu e por quê? ==> A Sessão 1 foi atulaizada
+-- Com o COMMIT na transação 1, indicando o fim da transação
 
 
 
--- REPEATABLE READ Só permite transação fantasma, o
+-- b)
 BEGIN;
-
-SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; 
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; -- Só permite leitura fanstama
 
 SELECT * FROM Jogador j
-inner join Equipe e
-on (j.IdEquipe = e.IdEquipe) where (RG = 111111111);
+INNER JOIN Equipe e
+on(j.IdEquipe = e.IdEquipe)
+where (RG = '111111111');
 
 COMMIT;
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- A sessão 1 foi atualizada, por causa do fim da Transação
 
 
--- 8)
 
---a)
-
--- Permite a leitura fantasma, se dá o COMMIT apenas em uma das duas.
+/*Questão 8*/
+-- a)
 BEGIN;
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED; 
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED; -- Nao Permite Leitura Suja
 
 SELECT * FROM Equipe;
-SELECT * FROM Equipe;
-rollback
+-- Ao enserir dados na Transação 2 e dá o COMMIT, a Transação 1 vai receber uma nova Equipe
 COMMIT;
 
 
---b)
-
--- Não permite a leitura fantasma, só acontece a transferência de Dados se as duas sessoes derem o COMMIT
+-- b)
 BEGIN;
-
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE; 
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE; -- Nível máximo de isolamento, não permite nenhum problema de isolamento.
 
 SELECT * FROM Equipe;
 
 COMMIT;
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
--- 9)
---a)
-
+/*Questão 9*/
+-- a)
 BEGIN;
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED; 
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
-UPDATE Jogador SET IdEquipe = 11 where RG = 111111112;
+UPDATE Jogador SET IdEquipe = 11 WHERE RG = '111111114';
 
 COMMIT;
 
+-- iv.  agora o que aconteceu na transação 2?
+	-- Agora a transação dois 'DESBUGOU', Pode executar novos comandos novamente
 
--- Na transição dois vai atualizar/ desbugou a transação 2, e  vai ocorrer uma leitura nao repetivel,  vai desbugar apos o COMMIT;
 
-
-
---b)
+-- b)
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-UPDATE Jogador SET IdEquipe = 11 where RG = 111111112;
+
+UPDATE Jogador SET IdEquipe = 9 WHERE RG = '111111115';
+
 COMMIT;
 
--- Na seção dois deu erro, não foi possível serializar o acesso devido a atualização simultânea
+-- IV.  agora o que aconteceu na transação 2?
+	-- Agora a transação dois pode executar comando novamente
 
 
-
-
---c)
+-- c)
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-UPDATE Jogador SET IdEquipe = 6 where RG = 111111113;
+
+UPDATE Jogador SET IdEquipe = 5 WHERE RG = '111111113';
+
 ROLLBACK;
--- A transação dois ficou normal
+
+-- IV.  agora o que aconteceu na transação 2?
+	-- Agora a transação dois pode executar comando novamente
