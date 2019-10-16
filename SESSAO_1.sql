@@ -179,7 +179,7 @@ insert into cores_uniforme values(7,7);
 insert into cores_uniforme values(7,2);
 insert into cores_uniforme values(8,7);
 
-/* Questão 8*/
+/* Questão 7*/
 -- a)
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED; -- Nao permite leitura suja
