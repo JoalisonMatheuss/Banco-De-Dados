@@ -150,8 +150,7 @@ CREATE OR REPLACE FUNCTION adicionaReserva(rg_cliente numeric, numero_quarto int
   ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-/*Não é interessante que alguns usuários acessem todas as informações sobre os 
-clientes, como, por exemplo, o RG e o telefone.*/
+/*Não é interessante que alguns usuários acessem todas as informações sobre os clientes, como, por exemplo, o RG e o telefone.*/
 
 -- Criação da visão para consultar o nome e o sexo dos clientes
 CREATE VIEW listaClientes (nome_cliente,sexo) AS
@@ -172,7 +171,10 @@ REVOKE ALL ON FUNCTION adicionaReserva(numeric,int,int,date) FROM PUBLIC;
 
 -- Concedendo permissão para o role gerente acessar todas as tabelas e conceder permissões para outros usuários
 GRANT SELECT, INSERT ON cliente, reserva, hospedagem, quarto, tipo_quarto, atendimento, servico, listaClientes TO gerente WITH GRANT OPTION;
+ '
+ '--> conceder o privilégio de ser membro de um papel.
 
+ 
 
 -- Concedendo permissão para o role gerente para acessar a função adicionaHospedagem
 GRANT EXECUTE ON FUNCTION adicionaHospedagem(numeric,int) TO gerente;
