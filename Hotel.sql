@@ -1,22 +1,24 @@
---Tabela de CLIENTES
- CREATE TABLE cliente (
+﻿// Tabela de CLIENTES
+  CREATE TABLE cliente(
   rg NUMERIC NOT NULL,
        nome VARCHAR(40) NOT NULL,
   sexo CHAR(1) NOT NULL,
   telefone NUMERIC(10,0),
   PRIMARY KEY (rg)
   ) WITHOUT OIDS;
-    
---Tabela TIPO_QUARTO
-  CREATE TABLE tipo_quarto (
+
+
+  // Tabela TIPO_QUARTO
+  CREATE TABLE tipo_quarto(
   id_tipo SERIAL NOT NULL,
   descricao VARCHAR(40) NOT NULL,
   valor NUMERIC(9,2) NOT NULL,
   PRIMARY KEY (id_tipo)
   ) WITHOUT OIDS;
+
     
---Tabela QUARTO
-  CREATE TABLE quarto (
+  // Tabela QUARTO
+  CREATE TABLE quarto(
   num_quarto INTEGER NOT NULL,
   andar CHAR(10),
   id_tipo INTEGER NOT NULL,
@@ -25,17 +27,19 @@
   FOREIGN KEY (id_tipo) REFERENCES tipo_quarto (id_tipo)
   ON UPDATE RESTRICT ON DELETE RESTRICT
   ) WITHOUT OIDS;
- 
---Tabela SERVIÇO
-  CREATE TABLE servico (
+
+    
+  // Tabela SERVIÇO
+  CREATE TABLE servico(
   id_servico SERIAL NOT NULL,
   descricao VARCHAR(60) NOT NULL,
   valor NUMERIC(9,2) NOT NULL,
   PRIMARY KEY (id_servico)
   ) WITHOUT OIDS;
 
---Tabela RESERVA
-  CREATE TABLE reserva (
+    
+  // Tabela RESERVA
+  CREATE TABLE reserva(
   id_reserva SERIAL NOT NULL,
   rg NUMERIC NOT NULL,
   num_quarto INTEGER NOT NULL,
@@ -49,9 +53,10 @@
    FOREIGN KEY (num_quarto) REFERENCES quarto (num_quarto)
    ON UPDATE RESTRICT ON DELETE RESTRICT
   ) WITHOUT OIDS;
+
     
---Tabela HOSPEDAGEM
-  CREATE TABLE hospedagem (
+  // Tabela HOSPEDAGEM
+  CREATE TABLE hospedagem(
        id_hospedagem SERIAL NOT NULL,
        rg NUMERIC NOT NULL,
        num_quarto INTEGER NOT NULL,
@@ -64,9 +69,10 @@
    FOREIGN KEY (num_quarto) REFERENCES quarto (num_quarto)
    ON UPDATE RESTRICT ON DELETE RESTRICT
   ) WITHOUT OIDS;
+
     
---Tabela ATENDIMENTO
-  CREATE TABLE atendimento (
+  // Tabela ATENDIMENTO
+  CREATE TABLE atendimento(
        id_atendimento SERIAL NOT NULL,
        id_servico INTEGER NOT NULL,
        id_hospedagem INTEGER NOT NULL,
@@ -75,12 +81,11 @@
    ON UPDATE RESTRICT ON DELETE RESTRICT,
    FOREIGN KEY (id_hospedagem) REFERENCES hospedagem (id_hospedagem)
    ON UPDATE RESTRICT ON DELETE RESTRICT
-  )  WITHOUT OIDS;
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  ) WITHOUT OIDS;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
---Comando de criação da funçãoadicionaHospedagem
-  CREATE OR REPLACE FUNCTION adicionaHospedagem(rg_cliente numeric, numero_quarto int) RETURNS void AS 
+-- Criando adicionaHospedagem
+CREATE OR REPLACE FUNCTION adicionaHospedagem(rg_cliente numeric, numero_quarto int) RETURNS void AS
   $$
     begin
       perform * from cliente where rg = rg_cliente;
@@ -99,11 +104,10 @@
     end;
   $$
   LANGUAGE plpgsql SECURITY DEFINER;
-  
 
 
--- Comando de criação da funçãoadicionaReserva
-  CREATE OR REPLACE FUNCTION adicionaReserva(rg_cliente numeric, numero_quarto int, dias int, data_entrada date) RETURNS void AS
+-- Criando adicionaReserva
+CREATE OR REPLACE FUNCTION adicionaReserva(rg_cliente numeric, numero_quarto int, dias int, data_entrada date) RETURNS void AS
   $$
     begin
       perform * from cliente where rg = rg_cliente;
@@ -124,8 +128,7 @@
   LANGUAGE plpgsql SECURITY DEFINER;
 
 
-
--- Comando de criação da funçãorealizaPedidos
+  -- Criando realizaPedido
   CREATE OR REPLACE FUNCTION realizaPedido(hosp int, serv int) RETURNS void AS
   $$
     begin
@@ -144,74 +147,81 @@
     end;
   $$
   LANGUAGE plpgsql SECURITY DEFINER;
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
---Criação da visão para consultar o nome e o sexo dos clientes
-  CREATE VIEW listaClientes (nome_cliente,sexo) AS
+/*Não é interessante que alguns usuários acessem todas as informações sobre os 
+clientes, como, por exemplo, o RG e o telefone.*/
+
+-- Criação da visão para consultar o nome e o sexo dos clientes
+CREATE VIEW listaClientes (nome_cliente,sexo) AS
   SELECT nome, sexo FROM cliente
 
 
 -- Criação dos papéis (roles) gerente, atendente e estagiário
-  CREATE ROLE gerente;
+CREATE ROLE gerente;
   CREATE ROLE atendente;
   CREATE ROLE estagiario;
 
 
 -- Revogando a execução das três funções para todos os usuários
-  REVOKE ALL ON FUNCTION adicionaReserva(numeric,int,int,date) FROM PUBLIC;
+REVOKE ALL ON FUNCTION adicionaReserva(numeric,int,int,date) FROM PUBLIC;
   REVOKE ALL ON FUNCTION adicionaHospedagem(numeric,int) FROM PUBLIC;
   REVOKE ALL ON FUNCTION realizaPedido(int,int) FROM PUBLIC;
 
 
 -- Concedendo permissão para o role gerente acessar todas as tabelas e conceder permissões para outros usuários
-  GRANT SELECT, INSERT ON cliente, reserva, hospedagem, quarto, tipo_quarto, atendimento, servico, listaClientes TO gerente WITH GRANT OPTION;
+GRANT SELECT, INSERT ON cliente, reserva, hospedagem, quarto, tipo_quarto, atendimento, servico, listaClientes TO gerente WITH GRANT OPTION;
 
 
 -- Concedendo permissão para o role gerente para acessar a função adicionaHospedagem
-  GRANT EXECUTE ON FUNCTION adicionaHospedagem(numeric,int) TO gerente;
+GRANT EXECUTE ON FUNCTION adicionaHospedagem(numeric,int) TO gerente;
 
 
 -- Concedendo permissão para o role gerente para acessar a função adicionaReserva
-  GRANT EXECUTE ON FUNCTION adicionaReserva(numeric,int,int,date) TO gerente;
+GRANT EXECUTE ON FUNCTION adicionaReserva(numeric,int,int,date) TO gerente;
 
 
---  Concedendo permissão para o role gerente para acessar a função realizarPedido
-  GRANT EXECUTE ON FUNCTION realizaPedido(int,int) TO gerente;
+-- Concedendo permissão para o role gerente para acessar a função realizarPedido
+GRANT EXECUTE ON FUNCTION realizaPedido(int,int) TO gerente;
 
 
 -- Concedendo permissão para o role gerente para acessar a view listaClientes
-  GRANT SELECT ON listaClientes TO gerente;
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GRANT SELECT ON listaClientes TO gerente
 
 
---  Concedendo permissão para o role atendente para acessar a função adicionaHospedagem
-  GRANT EXECUTE ON FUNCTION adicionaHospedagem(numeric,int) TO atendente;
+/*O grupo de usuários atendente não pode ter acesso a nenhuma tabela. Ele pode apenas acessar 
+as funções adicionaHospedagem, adicionaReserva e realizaPedidos.*/
+
+-- Concedendo permissão para o role atendente para acessar a função adicionaHospedagem
+GRANT EXECUTE ON FUNCTION adicionaHospedagem(numeric,int) TO atendente;
 
 
---  Concedendo permissão para o role atendente para acessar a função adicionaReserva
-  GRANT EXECUTE ON FUNCTION adicionaReserva(numeric,int,int,date) TO atendente;
+-- Concedendo permissão para o role atendente para acessar a função adicionaReserva
+GRANT EXECUTE ON FUNCTION adicionaReserva(numeric,int,int,date) TO atendente;
 
 
 -- Concedendo permissão para o role atendente para acessar a função realizaPedidos
-  GRANT EXECUTE ON FUNCTION
-  realizaPedido(int,int) TO atendente;
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GRANT EXECUTE ON FUNCTION realizaPedido(int,int) TO atendente;
+
 
 
 -- Concedendo permissão para o role estagiário acessar a visãolistaCliente
-  GRANT SELECT ON listaClientes TO estagiario;
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GRANT SELECT ON listaClientes TO estagiario;
 
+
+
+
+/*Simulando Testes para Validar as Permissões*/
 
 -- Criação de usuário com papel de gerente
-  CREATE ROLE tony LOGIN PASSWORD '111' IN ROLE gerente;
+CREATE ROLE tony LOGIN PASSWORD '111' IN ROLE gerente;
 
 
 -- Criação de usuário com papel de atendente
-  CREATE ROLE maria LOGIN PASSWORD '222' IN ROLE atendente;
+CREATE ROLE maria LOGIN PASSWORD '222' IN ROLE atendente;
 
 
 -- Criação de usuário com papel de atendente
-  CREATE ROLE vitoria LOGIN PASSWORD '333' IN ROLE estagiario;
+CREATE ROLE vitoria LOGIN PASSWORD '333' IN ROLE estagiario;
 
